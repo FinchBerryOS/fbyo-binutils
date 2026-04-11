@@ -138,7 +138,7 @@ ldelf_load_symbols (lang_input_statement_type *entry)
 /* On Linux, it's possible to have different versions of the same
    shared library linked against different versions of libc.  The
    dynamic linker somehow tags which libc version to use in
-   /etc/ld.so.cache, and, based on the libc that it sees in the
+   /System/Library/UnixEtc/ld.so.cache, and, based on the libc that it sees in the
    executable, chooses which version of the shared library to use.
 
    We try to do a similar check here by checking whether this shared
@@ -371,8 +371,11 @@ ldelf_try_needed (struct dt_needed *needed, int force, int is_linux)
   if (bfd_stat (abfd, &global_stat) != 0)
     fatal (_("%P: %pB: bfd_stat failed: %E\n"), abfd);
 
+  #if 0
   /* First strip off everything before the last '/'.  */
   soname = lbasename (bfd_get_filename (abfd));
+  #endif
+  soname = bfd_get_filename (abfd);
 
   if (verbose)
     info_msg (_("found %s at %s\n"), soname, name);
@@ -769,8 +772,8 @@ ldelf_check_ld_elf_hints (const struct bfd_link_needed_list *l, int force,
   return ldelf_search_needed (ld_elf_hints, &needed, force, false, elfsize);
 }
 
-/* For a native linker, check the file /etc/ld.so.conf for directories
-   in which we may find shared libraries.  /etc/ld.so.conf is really
+/* For a native linker, check the file /System/Library/UnixEtc/ld.so.conf for directories
+   in which we may find shared libraries.  /System/Library/UnixEtc/ld.so.conf is really
    only meaningful on Linux.  */
 
 struct ldelf_ld_so_conf
@@ -943,12 +946,12 @@ ldelf_check_ld_so_conf (const struct bfd_link_needed_list *l, int force,
 
       info.path = NULL;
       info.len = info.alloc = 0;
-      tmppath = concat (ld_sysroot, prefix, "/etc/ld.so.conf",
+      tmppath = concat (ld_sysroot, prefix, "/System/Library/UnixEtc/ld.so.conf",
 			(const char *) NULL);
       if (!ldelf_parse_ld_so_conf (&info, tmppath))
 	{
 	  free (tmppath);
-	  tmppath = concat (ld_sysroot, "/etc/ld.so.conf",
+	  tmppath = concat (ld_sysroot, "/System/Library/UnixEtc/ld.so.conf",
 			    (const char *) NULL);
 	  ldelf_parse_ld_so_conf (&info, tmppath);
 	}
@@ -1920,10 +1923,10 @@ ldelf_before_allocation (char **audit, char **depaudit,
 	      sizeof ehdr_start_save_u);
     }
 }
+
 /* Try to open a dynamic archive.  This is where we know that ELF
    dynamic libraries have an extension of .so (or .sl on oddball systems
    like hpux).  */
-
 bool
 ldelf_open_dynamic_archive (const char *arch, search_dirs_type *search,
 			    lang_input_statement_type *entry)
@@ -1973,30 +1976,18 @@ ldelf_open_dynamic_archive (const char *arch, search_dirs_type *search,
 
   entry->filename = string;
 
-  /* We have found a dynamic object to include in the link.  The ELF
-     backend linker will create a DT_NEEDED entry in the .dynamic
-     section naming this file.  If this file includes a DT_SONAME
-     entry, it will be used.  Otherwise, the ELF linker will just use
-     the name of the file.  For an archive found by searching, like
-     this one, the DT_NEEDED entry should consist of just the name of
-     the file, without the path information used to find it.  Note
-     that we only need to do this if we have a dynamic object; an
-     archive will never be referenced by a DT_NEEDED entry.
-
-     FIXME: This approach--using bfd_elf_set_dt_needed_name--is not
-     very pretty.  I haven't been able to think of anything that is
-     pretty, though.  */
-  if (bfd_check_format (entry->the_bfd, bfd_object)
-      && (entry->the_bfd->flags & DYNAMIC) != 0)
+  /* We have found a dynamic object to include in the link.
+     For FBYO native linking, preserve the resolved filename exactly as
+     recorded instead of collapsing it to a basename.  This keeps
+     DT_NEEDED path-based and aligned with the FBYO runtime linker.  */
+  if (bfd_check_format (entry->the_bfd, bfd_object) && (entry->the_bfd->flags & DYNAMIC) != 0)
     {
       ASSERT (entry->flags.maybe_archive && entry->flags.search_dirs);
 
       /* Rather than duplicating the logic above.  Just use the
 	 filename we recorded earlier.  */
 
-      if (!entry->flags.full_name_provided)
-	filename = lbasename (entry->filename);
-      bfd_elf_set_dt_needed_name (entry->the_bfd, filename);
+      bfd_elf_set_dt_needed_name (entry->the_bfd, entry->filename);
     }
 
   return true;

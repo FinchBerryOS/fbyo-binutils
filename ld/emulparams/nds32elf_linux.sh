@@ -7,7 +7,7 @@ EXTRA_EM_FILE=nds32elf
 BIG_OUTPUT_FORMAT="elf32-nds32be-linux"
 LITTLE_OUTPUT_FORMAT="elf32-nds32le-linux"
 OUTPUT_FORMAT="$LITTLE_OUTPUT_FORMAT"
-LIB_PATH="=/usr/local/lib:=/lib:=/usr/lib/"
+LIB_PATH="=/usr/gnulib"
 
 if [ "${DEFAULT_TEXT_START_ADDR}" = "0" ]; then
     TEXT_START_ADDR=0x8000

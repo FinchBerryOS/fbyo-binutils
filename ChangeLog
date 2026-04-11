@@ -1,3 +1,11 @@
+2026-04-10  Fluffelpuff  <fluffelpuff97@proton.me>
+
+	* ld/ldelf.c: Adjust Linux ld.so configuration paths for FBYO.
+	(ldelf_vercheck): Update comment to reference
+	/System/Library/UnixEtc/ld.so.cache.
+	(ldelf_check_ld_so_conf): Update comment and change lookup paths
+	from /etc/ld.so.conf to /System/Library/UnixEtc/ld.so.conf.
+
 2025-07-13  Nick Clifton  <nickc@redhat.com>
 
 	* 2.45 Binutils Branch point.

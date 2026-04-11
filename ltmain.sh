@@ -2033,8 +2033,8 @@ func_mode_finish ()
     if test -n "$admincmds"; then
       $ECHO "   - have your system administrator run these commands:$admincmds"
     fi
-    if test -f /etc/ld.so.conf; then
-      echo "   - have your system administrator add LIBDIR to \`/etc/ld.so.conf'"
+    if test -f /System/Library/UnixEtc/ld.so.conf; then
+      echo "   - have your system administrator add LIBDIR to \`/System/Library/UnixEtc/ld.so.conf'"
     fi
     echo
 

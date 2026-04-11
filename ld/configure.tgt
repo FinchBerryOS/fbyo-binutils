@@ -1101,7 +1101,7 @@ loongarch64-*)		targ_emul=elf64loongarch
 
 esac
 
-NATIVE_LIB_DIRS='/usr/local/lib /lib /usr/lib'
+NATIVE_LIB_DIRS='/usr/gnulib'
 case "${target}" in
 
 *-*-dragonfly*)
